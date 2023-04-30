@@ -86,7 +86,7 @@ class RectanglePerspectiveMethod(Method):
     def mask(self, img, shift):
 
         # initialize result
-        result = np.zeros(img.shape)
+        result = np.zeros((*img[:-1], 1))
 
         # get image vars
         height, width, channels = img.shape
@@ -101,7 +101,7 @@ class RectanglePerspectiveMethod(Method):
             else:
                 target -= shift
             for j in range(target):
-                result[i, j, :] = img[i, j, :]
+                result[i, j, 0] = img[i, j, 0]
 
         return result
 
@@ -163,7 +163,7 @@ def transform(data=None, shift=5, method=RectanglePerspectiveMethod, inPath=PATH
 def mask(data=None, shift=5, method=RectanglePerspectiveMethod, save=False, outPath=PATH_MASK):
 
     # initialize result
-    result = np.zeros(data.shape)
+    result = np.zeros((*data.shape[:-1], 1))
 
     # get size of dataset
     size = data.shape[0]
@@ -176,6 +176,7 @@ def mask(data=None, shift=5, method=RectanglePerspectiveMethod, save=False, outP
     for ind, img in bar:
 
         result[ind, :, :, :] = method.mask(img, shift)
+        print(np.average(result[ind, :, :, :]))
 
         # save image
         if save:
@@ -233,9 +234,9 @@ if __name__ == '__main__':
                       inPath=PATH_JPG,
                       outPath=PATH_RESIZED)
 
-    shiftmm = 10
+    shiftmm = 5
     method = RectanglePerspectiveMethod()
     transformed = transform(images, shift=shiftmm, method=method)
-    mask = mask(images, shift=shiftmm, method=method)
+    mask = mask(images, shift=shiftmm, method=method, save=True)
 
     print("Done!")
