@@ -186,11 +186,7 @@ def mask(data=None, shift=5, method=RectanglePerspectiveMethod, save=False, outP
 if __name__ == '__main__':
 
     # load dataset
-    images = loadData(height=IMAGE_HEIGHT,
-                      width=IMAGE_WIDTH,
-                      channel=IMAGE_CHANNEL,
-                      inPath=PATH_JPG,
-                      outPath=PATH_RESIZED)
+    images = loadData()
 
     # define shift and method
     shiftmm = 5
@@ -204,4 +200,4 @@ if __name__ == '__main__':
     mask = mask(images, shift=shiftmm, method=method, save=True)
     np.save(f'Data/s{shiftmm}trainY', mask)
 
-    print("Done!")
+    print("\n\nDone!")

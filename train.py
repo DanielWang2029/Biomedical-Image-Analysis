@@ -82,7 +82,7 @@ def getModel(shape=(128, 128, 3)):
     return model
 
 
-def train(model, trainX, trainY, path="Model/Unet.h5"):
+def train(model, trainX, trainY, path="Model/Unet.h5", validation_split=0.1, batch_size=8, epochs=100):
 
     # tf.compat.v1.disable_eager_execution()
     model_path = path
@@ -102,7 +102,12 @@ def train(model, trainX, trainY, path="Model/Unet.h5"):
                               restore_best_weights=True)
 
     # train model
-    return model.fit(trainX, trainY, validation_split=0.1, batch_size=4, epochs=100, callbacks=[earlystop, checkpoint])
+    return model.fit(trainX,
+                     trainY,
+                     validation_split=validation_split,
+                     batch_size=batch_size,
+                     epochs=epochs,
+                     callbacks=[earlystop, checkpoint])
 
 
 def plotResult(result, shift=5):
@@ -161,6 +166,20 @@ def plotComparison(trainX, trainY, prediction, shift=5):
         plt.close()
 
 
+def getDiceScore(actual, pred):
+
+    # initialize score container
+    scores = []
+
+    # iterate all results
+    for ind, img in enumerate(actual):
+
+        # calculate dice score
+        scores.append(2 * np.sum(img * pred[ind]) / (np.sum(img) + np.sum(pred[ind])))
+
+    return np.mean(scores)
+
+
 if __name__ == '__main__':
 
     # set path to save model and shift
@@ -170,14 +189,17 @@ if __name__ == '__main__':
     # load training data
     trainX, trainY = np.load(f'Data/s{shiftmm}trainX.npy'), np.load(f'Data/s{shiftmm}trainY.npy')
 
+    # get model
+    model = getModel(trainX.shape[1:])
+
     # get training result
-    result = train(getModel(trainX.shape[1:]), trainX, trainY, path=path)
+    result = train(model, trainX, trainY, path=path)
 
     # plot training result
     plotResult(result, shift=shiftmm)
 
     # reload trained model
-    model = load_model(path)
+    # model = load_model(path)
 
     # get model predictions
     prediction = (model.predict(trainX) > 0.5).astype(np.uint8)
@@ -185,4 +207,7 @@ if __name__ == '__main__':
     # plot image, mask and predictions
     plotComparison(trainX, trainY, prediction, shift=shiftmm)
 
-    print("Done!")
+    # print numerical results
+    print(f"Average dice score for the model is {getDiceScore(trainY, prediction):.4f}")
+
+    print("\n\nDone!")
