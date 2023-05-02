@@ -1,4 +1,5 @@
 import os
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
@@ -189,7 +190,7 @@ if __name__ == '__main__':
     images = loadData()
 
     # define shift and method
-    shiftmm = 5
+    shiftmm = 5 if len(sys.argv) <= 1 else int(sys.argv[1].split(".")[0])
     method = RectanglePerspectiveMethod()
 
     # get and save transformed data

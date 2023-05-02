@@ -1,10 +1,5 @@
 import sys
-import random
-import warnings #
-import pandas as pd
-from itertools import chain
-from skimage.io import imread, imshow, imread_collection, concatenate_images
-from skimage.morphology import label
+from skimage.io import imshow
 from tensorflow.keras.models import Model, load_model
 from tensorflow.keras.layers import Input
 from tensorflow.keras.layers import Dropout, Lambda
@@ -12,8 +7,6 @@ from tensorflow.keras.layers import Conv2D, Conv2DTranspose
 from tensorflow.keras.layers import MaxPooling2D
 from tensorflow.keras.layers import concatenate
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-from tensorflow.keras import backend as K
-import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
@@ -82,7 +75,7 @@ def getModel(shape=(128, 128, 3)):
     return model
 
 
-def train(model, trainX, trainY, path="Model/Unet.h5", validation_split=0.1, batch_size=8, epochs=100):
+def train(model, trainX, trainY, path="Model/Unet.h5", validation_split=0.1, batch_size=8, epochs=20):
 
     # tf.compat.v1.disable_eager_execution()
     model_path = path
@@ -119,7 +112,7 @@ def plotResult(result, shift=5):
     plt.ylabel('accuracy')
     plt.xlabel('epoch')
     plt.legend(['train', 'validation'], loc='upper left')
-    plt.savefig(f'Model/Validation-s{shift}.png')
+    plt.savefig(f'Model/Accuracy-s{shift}.png')
     plt.clf()
 
     # plot training loss
@@ -183,7 +176,7 @@ def getDiceScore(actual, pred):
 if __name__ == '__main__':
 
     # set path to save model and shift
-    shiftmm = 5
+    shiftmm = 5 if len(sys.argv) <= 1 else int(sys.argv[1].split(".")[0])
     path = f"Model/Unet-s{shiftmm}.h5"
 
     # load training data
